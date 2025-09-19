@@ -30,26 +30,31 @@ program main
    !----------------------------------
 
    !> Textbook Jacobi solver.
-   ! call cpu_time(start_time)
    start_time = omp_get_wtime()
    u = textbook_solver(b, maxiter)
    end_time = omp_get_wtime()
-   ! call cpu_time(end_time)
-   print *, "Textbook solver : ", end_time - start_time
+   print *, "    - Time-to-solution     :", end_time - start_time
    call save_npy("textbook_solution.npy", u)
 
-   !> flipflop Jacobi solver.
+   !> No-copy Jacobi solver.
    start_time = omp_get_wtime()
-   u = flipflop_solver(b, maxiter)
+   u = nocopy_solver(b, maxiter)
    end_time = omp_get_wtime()
-   print *, "flipflop solver :", end_time - start_time
+   print *, "    - Time-to-solution     :", end_time - start_time
+   call save_npy("flipflop_solution.npy", u)
+
+   !> On-the-fly Jacobi solver.
+   start_time = omp_get_wtime()
+   u = otf_norm_solver(b, maxiter)
+   end_time = omp_get_wtime()
+   print *, "    - Time-to-solution     :", end_time - start_time
    call save_npy("flipflop_solution.npy", u)
 
    !> doconcurrent Jacobi solver.
    start_time = omp_get_wtime()
    u = doconcurrent_solver(b, maxiter)
    end_time = omp_get_wtime()
-   print *, "doconccurent solver :", end_time - start_time
+   print *, "    - Time-to-solution     :", end_time - start_time
    call save_npy("doconcurrent_solution.npy", u)
 
 end program main
