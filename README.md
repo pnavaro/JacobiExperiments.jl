@@ -50,6 +50,8 @@ Vectorized solver on GPU :
 ## Instructions for running the Fortran program 
 
 ```
+git clone https://github.com/loiseaujc/Jacobi-Experiments
+cd Jacobi-Experiments
 conda install fpm
 fpm run --flag "-O3 -mtune=native -march=native"
 <WARNING> both openmp and stdlib requested: some functions may not be thread-safe!
