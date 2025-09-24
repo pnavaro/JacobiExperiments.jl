@@ -9,6 +9,7 @@ export nocopy_solver
 export otf_norm_solver
 export doconcurrent_solver
 export vectorized_solver
+export gpu_solver
 
 #----------------------------------
 #-----     JACOBI SOLVERS     -----
@@ -173,24 +174,24 @@ function gpu_solver(b::Matrix{T}, maxiter::Int) where {T}
     @assert (nx == ny) "Number of points in each direction need to be equal."
     u = CUDA.zeros(T, nx, ny)
     v = CUDA.zeros(T, nx, ny)
-    l2 = CUDA.ones(T, nx,ny)
+    b_gpu = CuArray(b)
     iteration = 0
+    l2_norm = one(T)
 
     while ((iteration < maxiter) && (l2_norm > tol))
         # Jacobi kernel.
-        vectorized_kernel!(nx, ny, v, u, b, dx)
+        vectorized_kernel!(nx, ny, v, u, b_gpu, dx)
         # Update variables.
-        vectorized_kernel!(nx, ny, u, v, b, dx)
+        vectorized_kernel!(nx, ny, u, v, b_gpu, dx)
         # Compute error norm.
         if (mod(iteration, 1000) == 0)
-                l2 .= (u .- v).^2
-                l2_norm = sqrt(sum(Array(l2_norm)))
+            l2_norm = norm(Array(u) - Array(v))
         end
         # Update iteration counter.
         iteration += 2
     end
     l2_norm = norm(Array(u) - Array(v))
-    println("Vectorized solver :")
+    println("Vectorized solver on GPU :")
     println("    - Number of iterations : $iteration")
     println("    - l2-norm of the error : $l2_norm")
     return Array(u)

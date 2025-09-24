@@ -4,8 +4,8 @@ using CUDA
 
 function main()
 
-    T = Float32
-    nx = 256
+    T = Float64
+    nx = 512
     ny = nx
     maxiter = nx^2
     b = zeros(T, nx, ny)
@@ -58,15 +58,16 @@ function main()
         u .= vectorized_solver(b, maxiter)
     end
     println(" - Time-to-solution     : $time")
-    return writedlm("vectorized_solution.txt", u, " ")
+    writedlm("vectorized_solution.txt", u, " ")
     
     # vectorized Jacobi solver on GPU
-    time = @elapsed begin
-        u .= gpu_solver(b, maxiter)
+    if CUDA.functional()
+        time = @elapsed begin
+            u .= gpu_solver(b, maxiter)
+        end
+        println(" - Time-to-solution     : $time")
+        writedlm("gpu_solution.txt", u, " ")
     end
-    println(" - Time-to-solution     : $time")
-    return writedlm("gpu_solution.txt", u, " ")
-
 
 end
 
