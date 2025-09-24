@@ -2,8 +2,11 @@
 
 Just a Julia version of [this cool fortran project](https://github.com/loiseaujc/Jacobi-Experiments)!
 
+Check the blog post : [Jacobi method: From a naïve implementation to a modern Fortran multithreaded one](https://loiseaujc.github.io/posts/blog-title/jacobi_experiments.html)
+
 - It can be noted that the optimized versions have similar performance than Fortran versions, but Julia language suffers more from the lack of optimization.
 - Vectorized operations are not efficient with Julia but if you use a GPU, it could be very fast.
+
 
 ## Instructions for running the Julia program
 
