@@ -1,5 +1,6 @@
 module JacobiExperiments
 
+using CUDA
 using LinearAlgebra
 using .Threads
 
@@ -16,7 +17,7 @@ export vectorized_solver
 function textbook_solver(b::Matrix{T}, maxiter::Int) where {T}
 
     # Initialize variables
-    nx = size(b, 1); ny = size(b, 2); dx = 1.0 / (nx - 1)
+    nx = size(b, 1); ny = size(b, 2); dx = T(1.0) / (nx - 1)
     tol = sqrt(eps(T))
     @assert (nx == ny) "Number of points in each direction need to be equal."
     u = zeros(T, nx, ny)
@@ -42,7 +43,7 @@ end
 function nocopy_solver(b::Matrix{T}, maxiter::Int) where {T}
 
     # Initialize variables
-    nx = size(b, 1); ny = size(b, 2); dx = 1.0 / (nx - 1)
+    nx = size(b, 1); ny = size(b, 2); dx = T(1.0) / (nx - 1)
     tol = sqrt(eps(T))
     @assert (nx == ny) "Number of points in each direction need to be equal."
     u = zeros(T, nx, ny)
@@ -69,7 +70,7 @@ end
 function otf_norm_solver(b::Matrix{T}, maxiter::Int) where {T}
 
     # Initialize variables
-    nx = size(b, 1); ny = size(b, 2); dx = 1.0 / (nx - 1)
+    nx = size(b, 1); ny = size(b, 2); dx = T(1.0) / (nx - 1)
     tol = sqrt(eps(T))
     @assert (nx == ny) "Number of points in each direction need to be equal."
     u = zeros(T, nx, ny)
@@ -96,10 +97,10 @@ function otf_norm_solver(b::Matrix{T}, maxiter::Int) where {T}
     return u
 end
 
-function doconcurrent_solver(b::Matrix{T}, maxiter; ::Int) where {T}
+function doconcurrent_solver(b::Matrix{T}, maxiter::Int) where {T}
 
     # Initialize variables
-    nx = size(b, 1); ny = size(b, 2); dx = 1.0 / (nx - 1)
+    nx = size(b, 1); ny = size(b, 2); dx = T(1.0) / (nx - 1)
     tol = sqrt(eps(T))
     @assert (nx == ny) "Number of points in each direction need to be equal."
     u = zeros(T, nx, ny)
@@ -133,7 +134,7 @@ end
 function vectorized_solver(b::Matrix{T}, maxiter::Int) where {T}
 
     # Initialize variables
-    nx = size(b, 1); ny = size(b, 2); dx = 1.0 / (nx - 1)
+    nx = size(b, 1); ny = size(b, 2); dx = T(1.0) / (nx - 1)
     tol = sqrt(eps(T))
     @assert (nx == ny) "Number of points in each direction need to be equal."
     u = zeros(T, nx, ny)
@@ -164,6 +165,37 @@ function vectorized_solver(b::Matrix{T}, maxiter::Int) where {T}
     return u
 end
 
+function gpu_solver(b::Matrix{T}, maxiter::Int) where {T}
+
+    # Initialize variables
+    nx = size(b, 1); ny = size(b, 2); dx = T(1.0) / (nx - 1)
+    tol = sqrt(eps(T))
+    @assert (nx == ny) "Number of points in each direction need to be equal."
+    u = CUDA.zeros(T, nx, ny)
+    v = CUDA.zeros(T, nx, ny)
+    l2 = CUDA.ones(T, nx,ny)
+    iteration = 0
+
+    while ((iteration < maxiter) && (l2_norm > tol))
+        # Jacobi kernel.
+        vectorized_kernel!(nx, ny, v, u, b, dx)
+        # Update variables.
+        vectorized_kernel!(nx, ny, u, v, b, dx)
+        # Compute error norm.
+        if (mod(iteration, 1000) == 0)
+                l2 .= (u .- v).^2
+                l2_norm = sqrt(sum(Array(l2_norm)))
+        end
+        # Update iteration counter.
+        iteration += 2
+    end
+    l2_norm = norm(Array(u) - Array(v))
+    println("Vectorized solver :")
+    println("    - Number of iterations : $iteration")
+    println("    - l2-norm of the error : $l2_norm")
+    return Array(u)
+end
+
 #----------------------------------
 #-----     JACOBI KERNELS     -----
 #----------------------------------
@@ -190,7 +222,7 @@ function doconcurrent_kernel!(nx::Int, ny::Int, u::Matrix{T}, v::Matrix{T}, b::M
     end
 end
 
-function vectorized_kernel!(nx::Int, ny::Int, u::Matrix{T}, v::Matrix{T}, b::Matrix{T}, dx::T) where {T}
+function vectorized_kernel!(nx::Int, ny::Int, u, v, b, dx::T) where {T}
 
     i = 2:(nx - 1)
     j = 2:(ny - 1)

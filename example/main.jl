@@ -1,5 +1,6 @@
 using DelimitedFiles
 using JacobiExperiments
+using CUDA
 
 function main()
 
@@ -58,6 +59,14 @@ function main()
     end
     println(" - Time-to-solution     : $time")
     return writedlm("vectorized_solution.txt", u, " ")
+    
+    # vectorized Jacobi solver on GPU
+    time = @elapsed begin
+        u .= gpu_solver(b, maxiter)
+    end
+    println(" - Time-to-solution     : $time")
+    return writedlm("gpu_solution.txt", u, " ")
+
 
 end
 
