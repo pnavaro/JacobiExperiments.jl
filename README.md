@@ -2,7 +2,8 @@
 
 Just a Julia version of [this cool fortran project](https://github.com/loiseaujc/Jacobi-Experiments)!
 
-It can be noted that the optimized versions have similar performance, but Julia language suffers more from the lack of optimization.
+- It can be noted that the optimized versions have similar performance than Fortran versions, but Julia language suffers more from the lack of optimization.
+- Vectorized operations are not efficient with Julia but you have a GPU, it could be very fast.
 
 ## Instructions for running the Julia program
 
@@ -33,6 +34,14 @@ Do-concurrent solver :
     - Number of iterations : 129002
     - l2-norm of the error : 1.4232008958046707e-8
  - Time-to-solution     : 20.807622978
+Vectorized solver :
+    - Number of iterations : 129002
+    - l2-norm of the error : 1.4232008958046707e-8
+ - Time-to-solution     : 196.83622151
+Vectorized solver on GPU :
+    - Number of iterations : 129002
+    - l2-norm of the error : 1.4232008958046707e-8
+ - Time-to-solution     : 7.441781801
 ```
 
 ## Instructions for running the Fortran program 
