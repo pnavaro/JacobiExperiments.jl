@@ -3,7 +3,7 @@
 Just a Julia version of [this cool fortran project](https://github.com/loiseaujc/Jacobi-Experiments)!
 
 - It can be noted that the optimized versions have similar performance than Fortran versions, but Julia language suffers more from the lack of optimization.
-- Vectorized operations are not efficient with Julia but you have a GPU, it could be very fast.
+- Vectorized operations are not efficient with Julia but if you use a GPU, it could be very fast.
 
 ## Instructions for running the Julia program
 
