@@ -11,8 +11,8 @@ git clone https://github.com/pnavaro/JacobiExperiments.jl.git
 cd JacobiExperiments.jl/
 julia --project
 ```
-               _
-```juliarepl
+
+```julia
 julia> import Pkg; Pkg.instantiate()
 julia> import .Threads; Threads.nthreads()
 8
@@ -59,7 +59,7 @@ Project is up to date
      - l2-norm of the error :   1.4232008958017304E-008
      - Time-to-solution     :   30.745370151475072
 ```
-The concurrent version didi not work. Probably my `gfortran` version is too old
+The concurrent version did not work. Probably my `gfortran` version is too old
 ```
 gcc version 11.4.0 (Ubuntu 11.4.0-1ubuntu1~22.04)
 ```
